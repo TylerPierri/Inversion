@@ -4,9 +4,10 @@ using UnityEngine;
 
 public class playerGravityControl : MonoBehaviour
 {
-    private GameObject Target;
+    private GameObject Target; // which target to focus around
 
-    [HideInInspector] public Vector2[] gravityDirection = new Vector2[4];
+    //these are public to allow the camera systems to sync with this infoation to rotate with the player smoothly
+    [HideInInspector] public Vector2[] gravityDirection = new Vector2[4]; 
     public float gravityStrength = 0.98f;
     private string[] gravityDirectionString = new string[4];
 
@@ -29,6 +30,7 @@ public class playerGravityControl : MonoBehaviour
         gravityDirection[2] = new Vector2(0, gravityStrength); // Green
         gravityDirection[3] = new Vector2(gravityStrength, 0); // Blue
 
+        // since Top/Bottem/Left/Right cant be used as an accurate way to tell which rotation you are facing when in game, colors are used instead
         gravityDirectionString[0] = "Gravity Red";
         gravityDirectionString[1] = "Gravity Yellow";
         gravityDirectionString[2] = "Gravity Green";
@@ -36,10 +38,10 @@ public class playerGravityControl : MonoBehaviour
     }
     void FixedUpdate()
     {
-        CheckDistanceFromGround();
+        CheckDistanceFromGround(); // calulates the distance between the target and the floor below to rotate smoothly before the target lands to the ground
     }
 
-    public void FlipRight()
+    public void FlipRight() // rotates target right
     {
         chosenDirection--;
         if (chosenDirection < 0)
@@ -56,7 +58,7 @@ public class playerGravityControl : MonoBehaviour
         StartCoroutine(Flip(chosenDirection));
     }
 
-    public void FlipLeft()
+    public void FlipLeft() //  rotates target left
     {
         chosenDirection++;
         if (chosenDirection > 3)
@@ -74,7 +76,7 @@ public class playerGravityControl : MonoBehaviour
         StartCoroutine(Flip(chosenDirection));
     }
 
-    private IEnumerator Flip(int Direction)
+    private IEnumerator Flip(int Direction) // prevents multiple flips while mid air until target hits the ground
     {
         InFlip = true;
         //Debug.Log(gravityDirectionString[Direction]);
@@ -88,7 +90,9 @@ public class playerGravityControl : MonoBehaviour
         //RaycastHit2D hit = Physics2D.Raycast(Target.transform.position, gravityDirection[chosenDirection], 10);
 
         Vector2 endPos = Target.transform.position * Vector2.right * 10;
-        RaycastHit2D hit = new RaycastHit2D();
+        RaycastHit2D hit = new RaycastHit2D(); 
+        
+        // since the targets rotation keeps changing, the direction of the GROUND keeps changing, as such the check system must also change
         switch (chosenDirection)
         {
             case 0:
@@ -110,7 +114,7 @@ public class playerGravityControl : MonoBehaviour
             //Debug.Log(hit.collider.name);
             //Debug.DrawRay(Target.transform.position, hit.point, Color.green);
             distanceFromFloor = Vector2.Distance(Target.transform.position, hit.point);
-            rotationSpeed = Mathf.Clamp((21 - distanceFromFloor) / 2, 2, 25);
+            rotationSpeed = Mathf.Clamp((21 - distanceFromFloor) / 2, 2, 25); // this'll calaculate the speed of rotation for the player and camera based on the distance between the player and ground
         }
 
     }
